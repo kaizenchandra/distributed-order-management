@@ -71,19 +71,19 @@ test("an old refresh cannot replace a newly signed-in account", async () => {
     assert.equal(await accessToken(), "new-account");
 });
 test("account switch during refresh-body decoding cannot restore an older token", async () => {
-  let finishBody;
-  globalThis.fetch = async () => ({
-    ok: true,
-    json: () =>
-      new Promise((resolve) => {
-        finishBody = resolve;
-      }),
-  });
-  setSession({ access_token: "old", refresh_token: "refresh", expires_in: 1 });
-  const pending = accessToken();
-  await new Promise((resolve) => setImmediate(resolve));
-  setSession({ access_token: "newer", expires_in: 300 });
-  finishBody({ access_token: "stale-body", expires_in: 300 });
-  await assert.rejects(pending, /session changed/);
-  assert.equal(await accessToken(), "newer");
+    let finishBody;
+    globalThis.fetch = async () => ({
+        ok: true,
+        json: () =>
+            new Promise((resolve) => {
+                finishBody = resolve;
+            }),
+    });
+    setSession({access_token: "old", refresh_token: "refresh", expires_in: 1});
+    const pending = accessToken();
+    await new Promise((resolve) => setImmediate(resolve));
+    setSession({access_token: "newer", expires_in: 300});
+    finishBody({access_token: "stale-body", expires_in: 300});
+    await assert.rejects(pending, /session changed/);
+    assert.equal(await accessToken(), "newer");
 });

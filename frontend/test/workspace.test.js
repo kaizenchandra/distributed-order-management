@@ -176,40 +176,40 @@ test("customer cart, failed checkout retry, timeline fallback, cancellation and 
     await submit("#login");
     await click("[data-view=cart]");
     assert.equal(document.querySelector("[data-sku=SKU-1]"), null);
-  const originalFetch = globalThis.fetch;
-  let finish;
-  globalThis.fetch = (path, options) =>
-    path.endsWith("/products")
-      ? new Promise((resolve) => {
-          finish = resolve;
-        })
-      : originalFetch(path, options);
-  await click("[data-view=catalog]");
-  window.history.replaceState(null, "", "#activity");
-  window.dispatchEvent(new dom.window.PopStateEvent("popstate"));
-  finish(Response.json([]));
-  await settle();
-  assert.match(document.querySelector("h1").textContent, /Activity/);
-  globalThis.fetch = originalFetch;
-  await click("[data-view=orders]");
-  Object.defineProperty(document, "hidden", {
-    value: false,
-    configurable: true,
-  });
-  document.activeElement?.blur();
-  globalThis.fetch = (path, options) =>
-    path === "/api/v1/orders?offset=0"
-      ? new Promise((resolve) => {
-          finish = resolve;
-        })
-      : originalFetch(path, options);
-  const background = poll();
-  await settle();
-  await click("[data-view=catalog]");
-  finish(Response.json({}, { status: 401 }));
-  await background;
-  await settle();
-  assert.ok(document.querySelector("#logout"));
-  assert.match(document.querySelector("h1").textContent, /Product catalog/);
-  globalThis.fetch = originalFetch;
+    const originalFetch = globalThis.fetch;
+    let finish;
+    globalThis.fetch = (path, options) =>
+        path.endsWith("/products")
+            ? new Promise((resolve) => {
+                finish = resolve;
+            })
+            : originalFetch(path, options);
+    await click("[data-view=catalog]");
+    window.history.replaceState(null, "", "#activity");
+    window.dispatchEvent(new dom.window.PopStateEvent("popstate"));
+    finish(Response.json([]));
+    await settle();
+    assert.match(document.querySelector("h1").textContent, /Activity/);
+    globalThis.fetch = originalFetch;
+    await click("[data-view=orders]");
+    Object.defineProperty(document, "hidden", {
+        value: false,
+        configurable: true,
+    });
+    document.activeElement?.blur();
+    globalThis.fetch = (path, options) =>
+        path === "/api/v1/orders?offset=0"
+            ? new Promise((resolve) => {
+                finish = resolve;
+            })
+            : originalFetch(path, options);
+    const background = poll();
+    await settle();
+    await click("[data-view=catalog]");
+    finish(Response.json({}, {status: 401}));
+    await background;
+    await settle();
+    assert.ok(document.querySelector("#logout"));
+    assert.match(document.querySelector("h1").textContent, /Product catalog/);
+    globalThis.fetch = originalFetch;
 });

@@ -51,8 +51,15 @@ handoff, projection rebuild or migration was executed by the implementation chec
 
 ## Final endpoint audit and reliability corrections
 
-All required HTTP endpoints listed in section 32 of the root `prompt.md` have corresponding customer or authorized Operations workflows. The audit also verified coverage of existing supplemental catalog, audit, recovery, migration, projection-rebuild, payment-operation and fulfillment-handoff endpoints. This is a frontend coverage statement, not production certification of the distributed backend.
+All required HTTP endpoints listed in section 32 of the root `prompt.md` have corresponding customer or authorized
+Operations workflows. The audit also verified coverage of existing supplemental catalog, audit, recovery, migration,
+projection-rebuild, payment-operation and fulfillment-handoff endpoints. This is a frontend coverage statement, not
+production certification of the distributed backend.
 
-Late API responses are discarded after navigation or account changes. Browser navigation requested during a loading operation is applied after that operation settles. An obsolete background 401 cannot clear the newer workspace. Token refresh checks account identity again after decoding the response body.
+Late API responses are discarded after navigation or account changes. Browser navigation requested during a loading
+operation is applied after that operation settles. An obsolete background 401 cannot clear the newer workspace. Token
+refresh checks account identity again after decoding the response body.
 
-Recovered carts accept only valid integer quantities. An invalid or damaged saved checkout is blocked rather than silently receiving a new idempotency key; customers must review order history and explicitly discard it in the cart before starting another request. Tokens and passwords remain memory-only.
+Recovered carts accept only valid integer quantities. An invalid or damaged saved checkout is blocked rather than
+silently receiving a new idempotency key; customers must review order history and explicitly discard it in the cart
+before starting another request. Tokens and passwords remain memory-only.

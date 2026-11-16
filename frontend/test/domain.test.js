@@ -33,48 +33,48 @@ test("checkout identity survives restore and is isolated by account", () => {
     };
     const checkout = {
         key: "12345678-1234-1234-1234-123456789abc",
-    quote: {
-      currency: "USD",
-      amount: 15000,
-      items: [{ sku: "SKU-1", quantity: 2, unitPrice: 7500 }],
-    },
-  };
-  saveWorkspace("customer", { "SKU-1": 2 }, checkout, storage);
-  assert.deepEqual(readWorkspace("customer", storage).checkout, checkout);
-  assert.deepEqual(readWorkspace("other", storage), {
-    cart: {},
-    checkout: null,
-  });
+        quote: {
+            currency: "USD",
+            amount: 15000,
+            items: [{sku: "SKU-1", quantity: 2, unitPrice: 7500}],
+        },
+    };
+    saveWorkspace("customer", {"SKU-1": 2}, checkout, storage);
+    assert.deepEqual(readWorkspace("customer", storage).checkout, checkout);
+    assert.deepEqual(readWorkspace("other", storage), {
+        cart: {},
+        checkout: null,
+    });
 });
 test("order summary distinguishes itself from a financial receipt", () => {
-  const text = receipt({
-    orderId: "one",
-    status: "CONFIRMED",
-    version: 2,
-    currency: "USD",
-    amount: 15000,
-    items: [{ sku: "SKU-1", quantity: 2, unitPrice: 7500 }],
-  });
-  assert.match(text, /USD 150.00/);
-  assert.match(text, /not a payment receipt/);
+    const text = receipt({
+        orderId: "one",
+        status: "CONFIRMED",
+        version: 2,
+        currency: "USD",
+        amount: 15000,
+        items: [{sku: "SKU-1", quantity: 2, unitPrice: 7500}],
+    });
+    assert.match(text, /USD 150.00/);
+    assert.match(text, /not a payment receipt/);
 });
 
 test("damaged recovery data blocks a new checkout until explicitly discarded", () => {
-  const storage = {
-    getItem: () =>
-      JSON.stringify({
-        cart: { "SKU-1": 2, "SKU-2": "bad" },
-        checkout: { key: "damaged" },
-      }),
-  };
-  const restored = readWorkspace("customer", storage);
-  assert.deepEqual(restored.cart, { "SKU-1": 2 });
-  assert.deepEqual(restored.checkout, { invalid: true });
+    const storage = {
+        getItem: () =>
+            JSON.stringify({
+                cart: {"SKU-1": 2, "SKU-2": "bad"},
+                checkout: {key: "damaged"},
+            }),
+    };
+    const restored = readWorkspace("customer", storage);
+    assert.deepEqual(restored.cart, {"SKU-1": 2});
+    assert.deepEqual(restored.checkout, {invalid: true});
 });
 
 test("invalid serialized checkout recovery is not silently discarded", () => {
-  assert.deepEqual(
-    readWorkspace("customer", { getItem: () => "{broken" }).checkout,
-    { invalid: true },
-  );
+    assert.deepEqual(
+        readWorkspace("customer", {getItem: () => "{broken"}).checkout,
+        {invalid: true},
+    );
 });

@@ -1,0 +1,15 @@
+{
+  "checks": [
+    {
+      "check": "ready",
+      "exit": 0,
+      "seconds": 1.375
+    },
+    {
+      "check": "missing-endpoint",
+      "exit": 1,
+      "seconds": 0.911
+    }
+  ],
+  "status": "PASS"
+}

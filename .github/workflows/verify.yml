@@ -1,0 +1,72 @@
+name: OMS verification
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      kafka_ha_campaign:
+        description: 'Run the three-broker failure and certificate rotation campaign'
+        type: boolean
+        default: false
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - run: mvn -B verify
+      - name: Build and start Docker-only OMS with secured Kafka
+        run: sh scripts/start-docker.sh
+      - name: Verify checkout, security, and failure recovery
+        run: |
+          set -euo pipefail
+          mkdir -p verification-results
+          python3 -u scripts/smoke.py | tee verification-results/smoke.txt
+          python3 -u scripts/payment-contract-test.py | tee verification-results/payment-contract.txt
+          python3 -u scripts/kafka-security-test.py | tee verification-results/kafka-security.txt
+          python3 -u scripts/recovery.py | tee verification-results/recovery.txt
+          python3 -u scripts/failure-tests.py | tee verification-results/failures.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: oms-verification
+          path: |
+            **/surefire-reports/*.xml
+            verification-results/
+      - name: Stop only this Compose project
+        if: always()
+        run: docker compose down
+  kafka-ha:
+    if: github.event_name == 'workflow_dispatch' && inputs.kafka_ha_campaign
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      OMS_COMPOSE_FILE: compose.ha.yml
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - run: sh scripts/start-ha.sh
+      - name: Verify HA, security and rolling CA rotation
+        run: |
+          set -euo pipefail
+          mkdir -p verification-results
+          python3 -u scripts/ha-test.py | tee verification-results/kafka-ha.txt
+          python3 -u scripts/kafka-security-test.py | tee verification-results/kafka-security.txt
+          python3 -u scripts/rotate-kafka-certificates.py | tee verification-results/kafka-rotation.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: oms-kafka-ha
+          path: |
+            verification-results/
+            .local/ha-checkouts.jsonl
+      - if: always()
+        run: docker compose -f compose.ha.yml down

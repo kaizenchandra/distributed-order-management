@@ -1,0 +1,2 @@
+PASS quorum/ISR loss: local order accepted, broker publication failed closed
+PASS restored quorum/ISR drained outbox and completed the pending order

@@ -1,0 +1,10 @@
+2026-11-15 continuation campaign
+Legacy local-simulator import: 5 verified; repeat found 0 candidates; balances/old-key replay verified with no new provider financial operations.
+Kafka HA: partition leader kill; controller leader kill; quorum/ISR outage fail-closed; quorum restore/outbox drain. All four passed in the Docker HA deployment before subsequent publisher optimization.
+Kafka CA rotation: dual trust; three rolling leaf replacements with checkout canaries; old CA retirement; fresh hostname-verified new-only connections. Passed. Full rollback path has not been executed.
+Raw public evidence and final suite/load results are retained separately alongside this file. A local three-process quorum on one physical host is not a multi-AZ test.
+
+Final code: 39 passing suite reports across full/targeted real-PostgreSQL runs, including final 13-test Payment guard rerun. All application artifacts packaged.
+Measured rebuild 28.680s -> 1.404s, differing history size noted. CQRS 100.03 RPS / 1001 successful requests / no errors or drops, p95 34.65ms.
+10-order/sec final run failed deadlines; all 200 accepted orders later completed and passed cohort audit after broker recovery. Post-recovery 2-order/sec run: all 21 complete, no failures/drops/timeouts, Saga p95 10.195s, cohort audit passed.
+Current HA cases verified across full attempt and targeted fresh-token rerun; see final-ha-summary.txt for the preserved expired-token harness failure.

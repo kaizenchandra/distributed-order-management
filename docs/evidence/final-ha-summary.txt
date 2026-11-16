@@ -1,0 +1,7 @@
+Final configuration: native OMS applications, Docker provider/PostgreSQL/OIDC and three Kafka nodes.
+Partition leader loss: PASS, five orders completed with one broker down.
+Controller leader loss: PASS, five orders completed after re-election.
+Quorum loss: PASS, local PENDING order and unpublished outbox retained.
+Quorum restoration: PASS in targeted rerun with refreshed credentials, ISR3 and pending order completed.
+The first full attempt's final inspection timed out because its 300-second admin token expired after the order had already completed; its full error log is retained. The corrected harness refreshes credentials and journals IDs. No failed attempt was deleted or counted as an uninterrupted full pass.
+Final provider verification: capture 7500, refunded 0, exactly two recorded provider operations for the journaled order.

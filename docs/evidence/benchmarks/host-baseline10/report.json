@@ -1,0 +1,37 @@
+{
+  "label": "host-baseline10",
+  "offered_rate": 10,
+  "submission_duration": "20s",
+  "wall_seconds": 131.261,
+  "offered": 200,
+  "accepted": 200,
+  "completed": 23,
+  "failed": 0,
+  "timeouts": 177,
+  "dropped_iterations": 0,
+  "poll_errors": 0,
+  "terminal_tps_including_drain": 0.175,
+  "command_ms": {
+    "p(95)": 385.4740499999997,
+    "p(99)": 551.9047099999999,
+    "max": 643.068,
+    "avg": 109.63202500000007,
+    "min": 15.888,
+    "med": 73.18,
+    "p(90)": 241.81550000000001
+  },
+  "saga_ms": {
+    "min": 26502,
+    "med": 81073,
+    "p(90)": 104269.4,
+    "p(95)": 105101.7,
+    "p(99)": 107171.7,
+    "max": 107736,
+    "avg": 76149.08695652174
+  },
+  "k6_exit": 99,
+  "entrypoint": "http://localhost:8091",
+  "timestamp": "2026-11-15T14:10:32.551454+00:00",
+  "deployment": "host",
+  "accounting_gap": 0
+}

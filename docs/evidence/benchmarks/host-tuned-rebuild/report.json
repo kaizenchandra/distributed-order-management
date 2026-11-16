@@ -1,0 +1,16 @@
+{
+  "label": "host-tuned-rebuild",
+  "workload": "local buffered projection rebuild",
+  "events_before": 2014,
+  "seconds": 1.4039958330104128,
+  "response": {
+    "eventsReplayed": 2014
+  },
+  "validation": {
+    "events": 2014,
+    "orders": 1002,
+    "version_mismatches": 0,
+    "timeline_rows": 2014,
+    "expected_timeline_rows": 2014
+  }
+}

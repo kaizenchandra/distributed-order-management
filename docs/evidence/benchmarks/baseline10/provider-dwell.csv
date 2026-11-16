@@ -1,0 +1,3 @@
+kind,count,mean_ms,p95_ms,attempts
+Payment.Authorize,150,2709.83,7327.2989,2
+Payment.Capture,150,5924.71,9246.0083,1

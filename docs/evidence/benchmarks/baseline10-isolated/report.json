@@ -1,0 +1,36 @@
+{
+  "label": "baseline10-isolated",
+  "offered_rate": 10,
+  "submission_duration": "20s",
+  "wall_seconds": 61.454,
+  "offered": 201,
+  "accepted": 201,
+  "completed": 201,
+  "failed": 0,
+  "timeouts": 0,
+  "dropped_iterations": 0,
+  "poll_errors": 578,
+  "terminal_tps_including_drain": 3.271,
+  "command_ms": {
+    "p(95)": 1345.122,
+    "p(99)": 1576.257,
+    "max": 1973.98,
+    "avg": 366.60395522388046,
+    "min": 22.463,
+    "med": 143.834,
+    "p(90)": 1176.022
+  },
+  "saga_ms": {
+    "p(90)": 41743,
+    "p(95)": 42085,
+    "p(99)": 42521,
+    "max": 43258,
+    "avg": 34082.199004975126,
+    "min": 20291,
+    "med": 34028
+  },
+  "k6_exit": 0,
+  "entrypoint": "http://localhost:8091",
+  "timestamp": "2026-11-15T13:27:19.288436+00:00",
+  "accounting_gap": 0
+}

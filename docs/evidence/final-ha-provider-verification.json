@@ -1,0 +1,7 @@
+{
+  "verified_journaled_ha_orders": 1,
+  "local_and_provider_capture": 7500,
+  "provider_operations_per_order": 2,
+  "order_event_partitions_isr": 3,
+  "status": "PASS"
+}

@@ -1,0 +1,9 @@
+.env
+**/target/
+benchmarks/results/
+docker/realm.local.json
+
+.local/
+**/__pycache__/
+docker/kafka.local/
+verification-results/

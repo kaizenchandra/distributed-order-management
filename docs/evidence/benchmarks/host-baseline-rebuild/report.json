@@ -1,0 +1,16 @@
+{
+  "label": "host-baseline-rebuild",
+  "workload": "local buffered projection rebuild",
+  "events_before": 1949,
+  "seconds": 28.67984058300499,
+  "response": {
+    "eventsReplayed": 1953
+  },
+  "validation": {
+    "events": 1983,
+    "orders": 1002,
+    "version_mismatches": 0,
+    "timeline_rows": 1983,
+    "expected_timeline_rows": 1983
+  }
+}

@@ -1,0 +1,12 @@
+PASS provider rejects missing service authentication
+PASS authenticated provider lookup preserves definitive 404 absence
+PASS provider outage before submit: absent lookup safely retried the same operation
+PASS authorize-timeout: lookup resolved lost response; one provider operation
+PASS capture-timeout: lookup resolved lost response; one provider operation
+PASS refund timeout reconciliation: refund applied once
+PASS payment process killed after provider commit: restart reconciled without recapture
+PASS ambiguous capture escalated, blocked cancellation effects, then reconciled and refunded once
+PASS Kafka outage: accepted order persisted two outbox intents and completed after recovery
+PASS duplicate Saga commands did not repeat provider financial operations
+PASS broker container recreation preserved log offsets and ACLs; new checkout completed
+PASS poison envelope reached DLT; healthy projection processing continued

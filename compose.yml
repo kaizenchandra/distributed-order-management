@@ -1,0 +1,574 @@
+---
+name: oms
+services:
+  postgres:
+    image: postgres:17.6
+    environment:
+      POSTGRES_PASSWORD: "${OMS_DB_PASSWORD:?Run scripts/configure-local.sh}"
+      OMS_DB_PASSWORD: "${OMS_DB_PASSWORD}"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - "./docker/init.sh:/docker-entrypoint-initdb.d/init.sh:ro"
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U postgres
+      interval: 3s
+      retries: 40
+  kafka:
+    image: apache/kafka:3.9.1
+    environment:
+      KAFKA_LOG_DIRS: "/var/lib/kafka/data"
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: INTERNAL://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:SASL_SSL,CONTROLLER:SASL_SSL
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'false'
+      KAFKA_NUM_PARTITIONS: 3
+      KAFKA_HEAP_OPTS: "-Xms128m -Xmx256m"
+      KAFKA_OPTS: "-Djava.security.auth.login.config=/security/broker-jaas.conf -XX:ActiveProcessorCount=2"
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_SASL_ENABLED_MECHANISMS: PLAIN
+      KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: PLAIN
+      KAFKA_SASL_MECHANISM_CONTROLLER_PROTOCOL: PLAIN
+      KAFKA_SSL_KEYSTORE_LOCATION: "/security/keystore.p12"
+      KAFKA_SSL_KEYSTORE_TYPE: PKCS12
+      KAFKA_SSL_TRUSTSTORE_LOCATION: "/security/truststore.p12"
+      KAFKA_SSL_TRUSTSTORE_TYPE: PKCS12
+      KAFKA_SSL_CLIENT_AUTH: none
+      KAFKA_AUTHORIZER_CLASS_NAME: org.apache.kafka.metadata.authorizer.StandardAuthorizer
+      KAFKA_SUPER_USERS: User:admin
+      KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: 'false'
+    volumes:
+      - kafkadata:/var/lib/kafka/data
+      - "./docker/kafka.local/keystore.p12:/security/keystore.p12:ro"
+      - "./docker/kafka.local/truststore.p12:/security/truststore.p12:ro"
+      - "./docker/kafka.local/broker-jaas.conf:/security/broker-jaas.conf:ro"
+    env_file:
+      - "./docker/kafka.local/broker.env"
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.4.2
+    command:
+      - start-dev
+      - "--import-realm"
+    environment:
+      JAVA_OPTS_APPEND: "-Xms64m -Xmx256m -XX:ActiveProcessorCount=2"
+      KC_HOSTNAME: http://localhost:${OMS_KEYCLOAK_PORT:-8180}
+    ports:
+      - 127.0.0.1:${OMS_KEYCLOAK_PORT:-8180}:8080
+    volumes:
+      - "./docker/realm.local.json:/opt/keycloak/data/import/realm.json:ro"
+  order-service:
+    build:
+      context: "."
+      dockerfile: docker/Dockerfile
+      args:
+        SERVICE: order-service
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xms32m -Xmx128m -Xss256k -XX:ActiveProcessorCount=1 -XX:ReservedCodeCacheSize=48m"
+      DB_URL: jdbc:postgresql://postgres:5432/order_service
+      DB_USER: order_service
+      DB_PASSWORD: "${OMS_DB_PASSWORD}"
+      KAFKA_BOOTSTRAP: kafka:9092
+      JWT_ISSUER: http://localhost:${OMS_KEYCLOAK_PORT:-8180}/realms/oms
+      JWT_JWKS: http://keycloak:8080/realms/oms/protocol/openid-connect/certs
+      SPRING_CONFIG_IMPORT: file:/run/oms/kafka-client.properties
+    ports:
+      - 127.0.0.1:8091:8080
+    mem_limit: 512m
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+      keycloak:
+        condition: service_started
+      kafka-init:
+        condition: service_completed_successfully
+    volumes:
+      - "./docker/kafka.local/order_service.properties:/run/oms/kafka-client.properties:ro"
+      - "./docker/kafka.local/truststore.p12:/run/oms/kafka-truststore.p12:ro"
+    healthcheck:
+      test:
+        - CMD
+        - bash
+        - "-c"
+        - |
+          #!/bin/bash
+          # No JVM per probe: check the application's HTTP readiness with Bash builtins.
+          set -eu
+          exec 3<>/dev/tcp/127.0.0.1/8080
+          printf 'GET /actuator/health/readiness HTTP/1.0\r\nHost: localhost\r\n\r\n' >&3
+          IFS= read -r -t 2 status <&3
+          case "$$status" in
+            *' 200 '*) exit 0 ;;
+            *) exit 1 ;;
+          esac
+      interval: 10s
+      timeout: 3s
+      retries: 30
+      start_period: 45s
+  inventory-service:
+    build:
+      context: "."
+      dockerfile: docker/Dockerfile
+      args:
+        SERVICE: inventory-service
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xms32m -Xmx128m -Xss256k -XX:ActiveProcessorCount=1 -XX:ReservedCodeCacheSize=48m"
+      DB_URL: jdbc:postgresql://postgres:5432/inventory_service
+      DB_USER: inventory_service
+      DB_PASSWORD: "${OMS_DB_PASSWORD}"
+      KAFKA_BOOTSTRAP: kafka:9092
+      JWT_ISSUER: http://localhost:${OMS_KEYCLOAK_PORT:-8180}/realms/oms
+      JWT_JWKS: http://keycloak:8080/realms/oms/protocol/openid-connect/certs
+      SPRING_CONFIG_IMPORT: file:/run/oms/kafka-client.properties
+    ports:
+      - 127.0.0.1:8092:8080
+    mem_limit: 512m
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+      keycloak:
+        condition: service_started
+      kafka-init:
+        condition: service_completed_successfully
+    volumes:
+      - "./docker/kafka.local/inventory_service.properties:/run/oms/kafka-client.properties:ro"
+      - "./docker/kafka.local/truststore.p12:/run/oms/kafka-truststore.p12:ro"
+    healthcheck:
+      test:
+        - CMD
+        - bash
+        - "-c"
+        - |
+          #!/bin/bash
+          # No JVM per probe: check the application's HTTP readiness with Bash builtins.
+          set -eu
+          exec 3<>/dev/tcp/127.0.0.1/8080
+          printf 'GET /actuator/health/readiness HTTP/1.0\r\nHost: localhost\r\n\r\n' >&3
+          IFS= read -r -t 2 status <&3
+          case "$$status" in
+            *' 200 '*) exit 0 ;;
+            *) exit 1 ;;
+          esac
+      interval: 10s
+      timeout: 3s
+      retries: 30
+      start_period: 45s
+  payment-service:
+    build:
+      context: "."
+      dockerfile: docker/Dockerfile
+      args:
+        SERVICE: payment-service
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xms32m -Xmx128m -Xss256k -XX:ActiveProcessorCount=1 -XX:ReservedCodeCacheSize=48m"
+      DB_URL: jdbc:postgresql://postgres:5432/payment_service
+      DB_USER: payment_service
+      DB_PASSWORD: "${OMS_DB_PASSWORD}"
+      KAFKA_BOOTSTRAP: kafka:9092
+      JWT_ISSUER: http://localhost:${OMS_KEYCLOAK_PORT:-8180}/realms/oms
+      JWT_JWKS: http://keycloak:8080/realms/oms/protocol/openid-connect/certs
+      SPRING_CONFIG_IMPORT: file:/run/oms/kafka-client.properties
+      PROVIDER_KEY: "${PROVIDER_KEY}"
+      PROVIDER_URL: http://payment-provider:8080
+    ports:
+      - 127.0.0.1:8093:8080
+    mem_limit: 512m
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+      keycloak:
+        condition: service_started
+      kafka-init:
+        condition: service_completed_successfully
+      payment-provider:
+        condition: service_healthy
+    volumes:
+      - "./docker/kafka.local/payment_service.properties:/run/oms/kafka-client.properties:ro"
+      - "./docker/kafka.local/truststore.p12:/run/oms/kafka-truststore.p12:ro"
+    healthcheck:
+      test:
+        - CMD
+        - bash
+        - "-c"
+        - |
+          #!/bin/bash
+          # No JVM per probe: check the application's HTTP readiness with Bash builtins.
+          set -eu
+          exec 3<>/dev/tcp/127.0.0.1/8080
+          printf 'GET /actuator/health/readiness HTTP/1.0\r\nHost: localhost\r\n\r\n' >&3
+          IFS= read -r -t 2 status <&3
+          case "$$status" in
+            *' 200 '*) exit 0 ;;
+            *) exit 1 ;;
+          esac
+      interval: 10s
+      timeout: 3s
+      retries: 30
+      start_period: 45s
+  fulfillment-service:
+    build:
+      context: "."
+      dockerfile: docker/Dockerfile
+      args:
+        SERVICE: fulfillment-service
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xms32m -Xmx128m -Xss256k -XX:ActiveProcessorCount=1 -XX:ReservedCodeCacheSize=48m"
+      DB_URL: jdbc:postgresql://postgres:5432/fulfillment_service
+      DB_USER: fulfillment_service
+      DB_PASSWORD: "${OMS_DB_PASSWORD}"
+      KAFKA_BOOTSTRAP: kafka:9092
+      JWT_ISSUER: http://localhost:${OMS_KEYCLOAK_PORT:-8180}/realms/oms
+      JWT_JWKS: http://keycloak:8080/realms/oms/protocol/openid-connect/certs
+      SPRING_CONFIG_IMPORT: file:/run/oms/kafka-client.properties
+    ports:
+      - 127.0.0.1:8094:8080
+    mem_limit: 512m
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+      keycloak:
+        condition: service_started
+      kafka-init:
+        condition: service_completed_successfully
+    volumes:
+      - "./docker/kafka.local/fulfillment_service.properties:/run/oms/kafka-client.properties:ro"
+      - "./docker/kafka.local/truststore.p12:/run/oms/kafka-truststore.p12:ro"
+    healthcheck:
+      test:
+        - CMD
+        - bash
+        - "-c"
+        - |
+          #!/bin/bash
+          # No JVM per probe: check the application's HTTP readiness with Bash builtins.
+          set -eu
+          exec 3<>/dev/tcp/127.0.0.1/8080
+          printf 'GET /actuator/health/readiness HTTP/1.0\r\nHost: localhost\r\n\r\n' >&3
+          IFS= read -r -t 2 status <&3
+          case "$$status" in
+            *' 200 '*) exit 0 ;;
+            *) exit 1 ;;
+          esac
+      interval: 10s
+      timeout: 3s
+      retries: 30
+      start_period: 45s
+  saga-orchestrator:
+    build:
+      context: "."
+      dockerfile: docker/Dockerfile
+      args:
+        SERVICE: saga-orchestrator
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xms32m -Xmx128m -Xss256k -XX:ActiveProcessorCount=1 -XX:ReservedCodeCacheSize=48m"
+      DB_URL: jdbc:postgresql://postgres:5432/saga_orchestrator
+      DB_USER: saga_orchestrator
+      DB_PASSWORD: "${OMS_DB_PASSWORD}"
+      KAFKA_BOOTSTRAP: kafka:9092
+      JWT_ISSUER: http://localhost:${OMS_KEYCLOAK_PORT:-8180}/realms/oms
+      JWT_JWKS: http://keycloak:8080/realms/oms/protocol/openid-connect/certs
+      SPRING_CONFIG_IMPORT: file:/run/oms/kafka-client.properties
+    ports:
+      - 127.0.0.1:8095:8080
+    mem_limit: 512m
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+      keycloak:
+        condition: service_started
+      kafka-init:
+        condition: service_completed_successfully
+    volumes:
+      - "./docker/kafka.local/saga_orchestrator.properties:/run/oms/kafka-client.properties:ro"
+      - "./docker/kafka.local/truststore.p12:/run/oms/kafka-truststore.p12:ro"
+    healthcheck:
+      test:
+        - CMD
+        - bash
+        - "-c"
+        - |
+          #!/bin/bash
+          # No JVM per probe: check the application's HTTP readiness with Bash builtins.
+          set -eu
+          exec 3<>/dev/tcp/127.0.0.1/8080
+          printf 'GET /actuator/health/readiness HTTP/1.0\r\nHost: localhost\r\n\r\n' >&3
+          IFS= read -r -t 2 status <&3
+          case "$$status" in
+            *' 200 '*) exit 0 ;;
+            *) exit 1 ;;
+          esac
+      interval: 10s
+      timeout: 3s
+      retries: 30
+      start_period: 45s
+  order-query-service:
+    build:
+      context: "."
+      dockerfile: docker/Dockerfile
+      args:
+        SERVICE: order-query-service
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xms32m -Xmx128m -Xss256k -XX:ActiveProcessorCount=1 -XX:ReservedCodeCacheSize=48m"
+      DB_URL: jdbc:postgresql://postgres:5432/order_query_service
+      DB_USER: order_query_service
+      DB_PASSWORD: "${OMS_DB_PASSWORD}"
+      KAFKA_BOOTSTRAP: kafka:9092
+      JWT_ISSUER: http://localhost:${OMS_KEYCLOAK_PORT:-8180}/realms/oms
+      JWT_JWKS: http://keycloak:8080/realms/oms/protocol/openid-connect/certs
+      SPRING_CONFIG_IMPORT: file:/run/oms/kafka-client.properties
+    ports:
+      - 127.0.0.1:8096:8080
+    mem_limit: 512m
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+      keycloak:
+        condition: service_started
+      kafka-init:
+        condition: service_completed_successfully
+    volumes:
+      - "./docker/kafka.local/order_query_service.properties:/run/oms/kafka-client.properties:ro"
+      - "./docker/kafka.local/truststore.p12:/run/oms/kafka-truststore.p12:ro"
+    healthcheck:
+      test:
+        - CMD
+        - bash
+        - "-c"
+        - |
+          #!/bin/bash
+          # No JVM per probe: check the application's HTTP readiness with Bash builtins.
+          set -eu
+          exec 3<>/dev/tcp/127.0.0.1/8080
+          printf 'GET /actuator/health/readiness HTTP/1.0\r\nHost: localhost\r\n\r\n' >&3
+          IFS= read -r -t 2 status <&3
+          case "$$status" in
+            *' 200 '*) exit 0 ;;
+            *) exit 1 ;;
+          esac
+      interval: 10s
+      timeout: 3s
+      retries: 30
+      start_period: 45s
+  catalog-service:
+    build:
+      context: "."
+      dockerfile: docker/Dockerfile
+      args:
+        SERVICE: catalog-service
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xms32m -Xmx128m -Xss256k -XX:ActiveProcessorCount=1 -XX:ReservedCodeCacheSize=48m"
+      DB_URL: jdbc:postgresql://postgres:5432/catalog_service
+      DB_USER: catalog_service
+      DB_PASSWORD: "${OMS_DB_PASSWORD}"
+      KAFKA_BOOTSTRAP: kafka:9092
+      JWT_ISSUER: http://localhost:${OMS_KEYCLOAK_PORT:-8180}/realms/oms
+      JWT_JWKS: http://keycloak:8080/realms/oms/protocol/openid-connect/certs
+      SPRING_CONFIG_IMPORT: file:/run/oms/kafka-client.properties
+    ports:
+      - 127.0.0.1:8097:8080
+    mem_limit: 512m
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+      keycloak:
+        condition: service_started
+      kafka-init:
+        condition: service_completed_successfully
+    volumes:
+      - "./docker/kafka.local/catalog_service.properties:/run/oms/kafka-client.properties:ro"
+      - "./docker/kafka.local/truststore.p12:/run/oms/kafka-truststore.p12:ro"
+    healthcheck:
+      test:
+        - CMD
+        - bash
+        - "-c"
+        - |
+          #!/bin/bash
+          # No JVM per probe: check the application's HTTP readiness with Bash builtins.
+          set -eu
+          exec 3<>/dev/tcp/127.0.0.1/8080
+          printf 'GET /actuator/health/readiness HTTP/1.0\r\nHost: localhost\r\n\r\n' >&3
+          IFS= read -r -t 2 status <&3
+          case "$$status" in
+            *' 200 '*) exit 0 ;;
+            *) exit 1 ;;
+          esac
+      interval: 10s
+      timeout: 3s
+      retries: 30
+      start_period: 45s
+  notification-service:
+    build:
+      context: "."
+      dockerfile: docker/Dockerfile
+      args:
+        SERVICE: notification-service
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xms32m -Xmx128m -Xss256k -XX:ActiveProcessorCount=1 -XX:ReservedCodeCacheSize=48m"
+      DB_URL: jdbc:postgresql://postgres:5432/notification_service
+      DB_USER: notification_service
+      DB_PASSWORD: "${OMS_DB_PASSWORD}"
+      KAFKA_BOOTSTRAP: kafka:9092
+      JWT_ISSUER: http://localhost:${OMS_KEYCLOAK_PORT:-8180}/realms/oms
+      JWT_JWKS: http://keycloak:8080/realms/oms/protocol/openid-connect/certs
+      SPRING_CONFIG_IMPORT: file:/run/oms/kafka-client.properties
+    mem_limit: 512m
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+      keycloak:
+        condition: service_started
+      kafka-init:
+        condition: service_completed_successfully
+    volumes:
+      - "./docker/kafka.local/notification_service.properties:/run/oms/kafka-client.properties:ro"
+      - "./docker/kafka.local/truststore.p12:/run/oms/kafka-truststore.p12:ro"
+    healthcheck:
+      test:
+        - CMD
+        - bash
+        - "-c"
+        - |
+          #!/bin/bash
+          # No JVM per probe: check the application's HTTP readiness with Bash builtins.
+          set -eu
+          exec 3<>/dev/tcp/127.0.0.1/8080
+          printf 'GET /actuator/health/readiness HTTP/1.0\r\nHost: localhost\r\n\r\n' >&3
+          IFS= read -r -t 2 status <&3
+          case "$$status" in
+            *' 200 '*) exit 0 ;;
+            *) exit 1 ;;
+          esac
+      interval: 10s
+      timeout: 3s
+      retries: 30
+      start_period: 45s
+  api-gateway:
+    build:
+      context: "."
+      dockerfile: docker/Dockerfile
+      args:
+        SERVICE: api-gateway
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xms32m -Xmx128m -Xss256k -XX:ActiveProcessorCount=1 -XX:ReservedCodeCacheSize=48m"
+      DB_URL: jdbc:postgresql://postgres:5432/api_gateway
+      DB_USER: api_gateway
+      DB_PASSWORD: "${OMS_DB_PASSWORD}"
+      KAFKA_BOOTSTRAP: kafka:9092
+      JWT_ISSUER: http://localhost:${OMS_KEYCLOAK_PORT:-8180}/realms/oms
+      JWT_JWKS: http://keycloak:8080/realms/oms/protocol/openid-connect/certs
+      SPRING_CONFIG_IMPORT: file:/run/oms/kafka-client.properties
+    ports:
+      - 127.0.0.1:8099:8080
+    mem_limit: 512m
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+      keycloak:
+        condition: service_started
+      kafka-init:
+        condition: service_completed_successfully
+    volumes:
+      - "./docker/kafka.local/api_gateway.properties:/run/oms/kafka-client.properties:ro"
+      - "./docker/kafka.local/truststore.p12:/run/oms/kafka-truststore.p12:ro"
+    healthcheck:
+      test:
+        - CMD
+        - bash
+        - "-c"
+        - |
+          #!/bin/bash
+          # No JVM per probe: check the application's HTTP readiness with Bash builtins.
+          set -eu
+          exec 3<>/dev/tcp/127.0.0.1/8080
+          printf 'GET /actuator/health/readiness HTTP/1.0\r\nHost: localhost\r\n\r\n' >&3
+          IFS= read -r -t 2 status <&3
+          case "$$status" in
+            *' 200 '*) exit 0 ;;
+            *) exit 1 ;;
+          esac
+      interval: 10s
+      timeout: 3s
+      retries: 30
+      start_period: 45s
+  kafka-init:
+    image: apache/kafka:3.9.1
+    entrypoint:
+      - "/bin/bash"
+      - "/bootstrap/kafka-bootstrap.sh"
+    environment:
+      KAFKA_HEAP_OPTS: "-Xms32m -Xmx96m"
+      JAVA_TOOL_OPTIONS: "-XX:ActiveProcessorCount=1"
+    volumes:
+      - "./docker/kafka-bootstrap.sh:/bootstrap/kafka-bootstrap.sh:ro"
+      - "./docker/kafka.local/cli:/security/cli:ro"
+      - "./docker/kafka.local/truststore.p12:/security/truststore.p12:ro"
+    depends_on:
+      kafka:
+        condition: service_started
+  payment-provider:
+    build:
+      context: "."
+      dockerfile: docker/Dockerfile
+      args:
+        SERVICE: payment-provider
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xms32m -Xmx128m -Xss256k -XX:ActiveProcessorCount=1 -XX:ReservedCodeCacheSize=48m"
+      DB_URL: jdbc:postgresql://postgres:5432/payment_provider
+      DB_USER: payment_provider
+      DB_PASSWORD: "${OMS_DB_PASSWORD}"
+      PROVIDER_KEY: "${PROVIDER_KEY}"
+    ports:
+      - 127.0.0.1:8100:8080
+    mem_limit: 384m
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - bash
+        - "-c"
+        - |
+          #!/bin/bash
+          # No JVM per probe: check the application's HTTP readiness with Bash builtins.
+          set -eu
+          exec 3<>/dev/tcp/127.0.0.1/8080
+          printf 'GET /actuator/health/readiness HTTP/1.0\r\nHost: localhost\r\n\r\n' >&3
+          IFS= read -r -t 2 status <&3
+          case "$$status" in
+            *' 200 '*) exit 0 ;;
+            *) exit 1 ;;
+          esac
+      interval: 10s
+      timeout: 3s
+      retries: 30
+      start_period: 30s
+volumes:
+  pgdata:
+  kafkadata: 

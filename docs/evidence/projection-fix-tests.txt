@@ -1,0 +1,9 @@
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 28.17 s -- in dev.oms.orderqueryservice.ProjectionTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0
+[INFO] distributed-order-management ....................... SUCCESS [  0.004 s]
+[INFO] test-support ....................................... SUCCESS [  4.221 s]
+[INFO] event-contracts .................................... SUCCESS [  3.245 s]
+[INFO] order-query-service ................................ SUCCESS [ 33.057 s]
+[INFO] BUILD SUCCESS
+[INFO] Total time:  41.410 s
+[INFO] Finished at: 2026-11-15T19:56:36+05:30

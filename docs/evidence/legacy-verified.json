@@ -1,0 +1,5 @@
+{
+  "verified_balances": 5,
+  "opening_balance_imports_are_not_provider_charges": true,
+  "historical_capture_replays_return_recorded_success": true
+}

@@ -1,0 +1,9 @@
+**/target
+.env
+.git
+
+.local
+docker/kafka.local
+docker/realm.local.json
+**/__pycache__
+benchmarks/results

@@ -1,0 +1,7 @@
+action,count,mean_ms,p95_ms
+Fulfillment.Start,21,472.00,819.268
+Inventory.Confirm,21,918.54,2161.677
+Inventory.Try,21,673.82,1143.313
+Order.Confirm,21,517.03,881.126
+Payment.Authorize,21,1693.07,3733.393
+Payment.Capture,21,501.20,882.25

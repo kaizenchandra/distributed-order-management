@@ -1,0 +1,13 @@
+PASS dual CA trust installed on clients and all quorum members
+PASS rolled new certificate and completed checkout: kafka-a
+PASS rolled new certificate and completed checkout: kafka-b
+PASS rolled new certificate and completed checkout: kafka-c
+PASS old CA retired; fresh new-only TLS and checkout verified
+{
+  "stage": "RETIRED",
+  "fingerprints": {
+    "kafka-a": "kafka-a b7ae4b73d75872f1c1c11ac141a753800a3e685f338b61776bfd09778f190d85",
+    "kafka-b": "kafka-b a346790031d586cb1387f6d299378febcc8a86547fb3a925ca974c8200f55558",
+    "kafka-c": "kafka-c 5b16165726ad3b5e134dbb346b9f12a653abd907680f0aac193535eeb59a1ed9"
+  }
+}

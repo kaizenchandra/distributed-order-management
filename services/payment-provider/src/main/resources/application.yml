@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: payment-provider
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/payment_provider}
+    username: ${DB_USER:payment_provider}
+    password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 4
+server:
+  port: ${PORT:8080}
+  shutdown: graceful
+  tomcat:
+    threads:
+      max: 16
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true

@@ -1,0 +1,7 @@
+{
+  "run": "recovered2",
+  "orders": 21,
+  "completed": 21,
+  "compensated": 0,
+  "ledger_inventory_order_checks": "PASS"
+}

@@ -1,0 +1,89 @@
+{{- range .Values.services }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ . }}
+spec:
+  replicas: 2
+  selector:
+    matchLabels: { app: {{ . }}}
+  template:
+    metadata:
+      labels: { app: {{ . }}}
+    spec:
+      terminationGracePeriodSeconds: 40
+      securityContext: { runAsNonRoot: true, runAsUser: 10001 }
+      containers:
+        - name: app
+          image: {{ $.Values.imageRegistry }}/{{ . }}:{{ $.Values.imageTag }}
+          ports: [ { containerPort: 8080 } ]
+          envFrom:
+            - secretRef: { name: {{ . }}-database }
+{{- if or (eq . "payment-service") (eq . "payment-provider") }}
+            - secretRef: { name: payment-provider-client }
+{{- end }}
+          env:
+{{- if ne . "payment-provider" }}
+            - { name: SPRING_CONFIG_IMPORT, value: "file:/run/oms/kafka-client.properties" }
+{{- end }}
+            - { name: JWT_ISSUER, value: {{ $.Values.issuer | quote }}}
+            - { name: JWT_JWKS, value: {{ $.Values.jwks | quote }}}
+            - { name: KAFKA_BOOTSTRAP, value: {{ $.Values.kafka | quote }}}
+{{- if ne . "payment-provider" }}
+          volumeMounts:
+            - { name: kafka-client, mountPath: /run/oms, readOnly: true }
+{{- end }}
+          resources:
+            requests: { cpu: 250m, memory: 384Mi }
+            limits: { cpu: '2', memory: 768Mi }
+          readinessProbe:
+            httpGet: { path: /actuator/health/readiness, port: 8080 }
+            initialDelaySeconds: 30
+          livenessProbe:
+            httpGet: { path: /actuator/health/liveness, port: 8080 }
+            initialDelaySeconds: 60
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities: { drop: [ ALL ] }
+{{- if ne . "payment-provider" }}
+      volumes:
+        - name: kafka-client
+          secret:
+            secretName: {{ . }}-kafka-client
+            items:
+              - { key: client.properties, path: kafka-client.properties }
+              - { key: truststore.p12, path: kafka-truststore.p12 }
+{{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ . }}
+spec:
+  selector: { app: {{ . }}}
+  ports: [ { port: 8080, targetPort: 8080 } ]
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ . }}
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels: { app: {{ . }}}
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ . }}
+spec:
+  scaleTargetRef: { apiVersion: apps/v1, kind: Deployment, name: {{ . }}}
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target: { type: Utilization, averageUtilization: 70 }
+{{- end }}

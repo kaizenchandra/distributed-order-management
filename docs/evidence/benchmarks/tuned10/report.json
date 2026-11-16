@@ -1,0 +1,36 @@
+{
+  "label": "tuned10",
+  "offered_rate": 10,
+  "submission_duration": "20s",
+  "wall_seconds": 131.559,
+  "offered": 200,
+  "accepted": 197,
+  "completed": 159,
+  "failed": 3,
+  "timeouts": 38,
+  "dropped_iterations": 0,
+  "poll_errors": 58,
+  "terminal_tps_including_drain": 1.209,
+  "command_ms": {
+    "p(99)": 6991.005849999999,
+    "max": 7883.388,
+    "avg": 946.8098399999997,
+    "min": 27.378,
+    "med": 227.81799999999998,
+    "p(90)": 3388.144600000001,
+    "p(95)": 4410.9358
+  },
+  "saga_ms": {
+    "med": 67404,
+    "p(90)": 94337.60000000003,
+    "p(95)": 108834.5,
+    "p(99)": 109542.9,
+    "max": 109831,
+    "avg": 74001.61635220126,
+    "min": 52181
+  },
+  "k6_exit": 99,
+  "entrypoint": "http://localhost:8091",
+  "timestamp": "2026-11-15T13:33:01.084182+00:00",
+  "accounting_gap": 0
+}

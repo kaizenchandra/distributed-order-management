@@ -1,0 +1,39 @@
+{
+  "label": "recovered2",
+  "offered_rate": 2,
+  "submission_duration": "10s",
+  "wall_seconds": 13.314,
+  "offered": 21,
+  "accepted": 21,
+  "completed": 21,
+  "failed": 0,
+  "timeouts": 0,
+  "dropped_iterations": 0,
+  "poll_errors": 0,
+  "terminal_tps_including_drain": 1.577,
+  "command_ms": {
+    "avg": 310.098619047619,
+    "min": 18.369,
+    "med": 111.129,
+    "p(90)": 1092.409,
+    "p(95)": 1120.34,
+    "p(99)": 1457.8703999999998,
+    "max": 1542.253
+  },
+  "saga_ms": {
+    "min": 2040,
+    "med": 6150,
+    "p(90)": 9729,
+    "p(95)": 10195,
+    "p(99)": 10590.2,
+    "max": 10689,
+    "avg": 6281.428571428572
+  },
+  "k6_exit": 0,
+  "entrypoint": "http://localhost:8091",
+  "timestamp": "2026-11-15T14:58:21.510573+00:00",
+  "deployment": "host",
+  "preallocated_vus": 32,
+  "max_vus": 32,
+  "accounting_gap": 0
+}

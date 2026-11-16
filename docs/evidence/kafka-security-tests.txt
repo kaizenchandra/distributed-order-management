@@ -1,0 +1,6 @@
+PASS admin authenticates over verified TLS
+PASS wrong password rejected
+PASS untrusted certificate rejected
+PASS order identity cannot publish payment commands
+PASS query identity cannot consume using another service group
+PASS anonymous TLS connection cannot use Kafka API

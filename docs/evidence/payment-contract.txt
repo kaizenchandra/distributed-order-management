@@ -1,0 +1,3 @@
+PASS unauthorized and fractional-money requests cannot queue financial work
+PASS 202 operation polling, stable-key replay and changed-payload rejection
+PASS capture/refund timeout recovery preserves one provider operation per logical request

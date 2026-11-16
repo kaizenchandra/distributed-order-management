@@ -1,0 +1,13 @@
+PASS partition leader loss: five accepted orders completed with ISR=2
+PASS active controller loss: quorum re-elected and checkout continued
+PASS quorum/ISR loss: local order accepted, broker publication failed closed
+Traceback (most recent call last):
+  File "/Volumes/KaizenChandra/Workspace/01-Interview/system-design/system-design/distributed-order-management/scripts/ha-test.py", line 45, in <module>
+    eventually(isr3,120);complete(oid,operator)
+                         ~~~~~~~~^^^^^^^^^^^^^^
+  File "/Volumes/KaizenChandra/Workspace/01-Interview/system-design/system-design/distributed-order-management/scripts/ha-test.py", line 17, in complete
+    eventually(lambda:inspect(oid,admin_token).get('state')=='COMPLETED',180)
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Volumes/KaizenChandra/Workspace/01-Interview/system-design/system-design/distributed-order-management/scripts/smoke.py", line 30, in eventually
+    raise AssertionError('Timed out waiting for '+str(fn))
+AssertionError: Timed out waiting for <function complete.<locals>.<lambda> at 0x109c6cb40>

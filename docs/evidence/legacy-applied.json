@@ -1,0 +1,35 @@
+{
+  "verified": [
+    {
+      "migrationId": "027c35ea-3fd2-3814-89f8-4806cedbad9b",
+      "paymentId": "18f88fa7-bd90-4709-877e-20f471a47cf6",
+      "digest": "e04e75c9894061da928c77c39de5f6ccc874abaea171d4151359a6f9eb3eed12",
+      "status": "VERIFIED"
+    },
+    {
+      "migrationId": "24b73207-5634-3727-8492-c9fdc6b4a5f8",
+      "paymentId": "3cfc4a23-8056-4bff-9df9-25884669ee9d",
+      "digest": "1695b85e6cfcf7398391aa62b2c457811743eda27df1965fb0137c2c853c0574",
+      "status": "VERIFIED"
+    },
+    {
+      "migrationId": "247c0776-3522-3e06-8c9b-dda7fee07189",
+      "paymentId": "3def1b1b-9aed-40d9-bfd6-25399e39b7c6",
+      "digest": "d7f67c0b7494023a420f4c58aacd10da5a76a8232e41d07e093517dba6d10f1d",
+      "status": "VERIFIED"
+    },
+    {
+      "migrationId": "e4432ab0-28d5-3420-a01d-8433757324ef",
+      "paymentId": "9c615fb2-21fe-4462-b572-69e992baa827",
+      "digest": "df60173cd770dd6c72f4685f63fd3f4cf328499ccf193ef8cb9a2c7c5aa6103c",
+      "status": "VERIFIED"
+    },
+    {
+      "migrationId": "2943189c-9655-3749-844d-ec17bfd7a4e1",
+      "paymentId": "d3cc24ab-3768-4b18-9dfb-bd617edfc0c6",
+      "digest": "87fa82e8e198055b4d5b645756e02979a86873899d349ee8526319d5903a18d8",
+      "status": "VERIFIED"
+    }
+  ],
+  "count": 5
+}

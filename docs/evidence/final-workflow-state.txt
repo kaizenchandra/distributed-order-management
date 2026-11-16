@@ -1,0 +1,6 @@
+saga_orchestrator
+COMPENSATED 4 59 
+COMPLETED 6 1176 
+payment_service
+SUCCEEDED 2477 
+REJECTED 7 

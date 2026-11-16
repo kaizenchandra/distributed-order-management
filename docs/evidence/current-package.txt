@@ -1,0 +1,16 @@
+[INFO] distributed-order-management ....................... SUCCESS [  0.001 s]
+[INFO] test-support ....................................... SUCCESS [  2.315 s]
+[INFO] event-contracts .................................... SUCCESS [  0.829 s]
+[INFO] order-service ...................................... SUCCESS [  1.222 s]
+[INFO] inventory-service .................................. SUCCESS [  0.549 s]
+[INFO] payment-service .................................... SUCCESS [  0.588 s]
+[INFO] payment-provider ................................... SUCCESS [  0.436 s]
+[INFO] fulfillment-service ................................ SUCCESS [  0.627 s]
+[INFO] saga-orchestrator .................................. SUCCESS [  0.578 s]
+[INFO] order-query-service ................................ SUCCESS [  0.466 s]
+[INFO] catalog-service .................................... SUCCESS [  0.387 s]
+[INFO] notification-service ............................... SUCCESS [  0.303 s]
+[INFO] api-gateway ........................................ SUCCESS [  0.374 s]
+[INFO] BUILD SUCCESS
+[INFO] Total time:  9.621 s
+[INFO] Finished at: 2026-11-15T19:57:16+05:30

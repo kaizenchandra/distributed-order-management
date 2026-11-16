@@ -1,0 +1,1200 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "OMS baseline HTTP contracts",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8099"
+    }
+  ],
+  "security": [
+    {
+      "bearer": []
+    }
+  ],
+  "paths": {
+    "/api/v1/orders": {
+      "post": {
+        "summary": "Create order",
+        "description": "Requires customer authorization. Internal routes use the owning service port rather than gateway.",
+        "responses": {
+          "200": {
+            "description": "Current state or operation result"
+          },
+          "401": {
+            "description": "Invalid or absent JWT"
+          },
+          "403": {
+            "description": "Ownership or scope rejected"
+          },
+          "409": {
+            "description": "Business conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Committed command-side state, orderId and version; projection is asynchronous"
+          }
+        },
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Checkout"
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "List owned order identifiers",
+        "description": "Requires customer authorization. Internal routes use the owning service port rather than gateway.",
+        "responses": {
+          "200": {
+            "description": "Current state or operation result"
+          },
+          "401": {
+            "description": "Invalid or absent JWT"
+          },
+          "403": {
+            "description": "Ownership or scope rejected"
+          },
+          "409": {
+            "description": "Business conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "parameters": []
+      }
+    },
+    "/api/v1/orders/{orderId}": {
+      "get": {
+        "summary": "Read authoritative order",
+        "description": "Requires customer authorization. Internal routes use the owning service port rather than gateway.",
+        "responses": {
+          "200": {
+            "description": "Current state or operation result"
+          },
+          "401": {
+            "description": "Invalid or absent JWT"
+          },
+          "403": {
+            "description": "Ownership or scope rejected"
+          },
+          "409": {
+            "description": "Business conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/orders/{orderId}/cancel": {
+      "post": {
+        "summary": "Request cancellation",
+        "description": "Requires customer authorization. Internal routes use the owning service port rather than gateway.",
+        "responses": {
+          "200": {
+            "description": "Current state or operation result"
+          },
+          "401": {
+            "description": "Invalid or absent JWT"
+          },
+          "403": {
+            "description": "Ownership or scope rejected"
+          },
+          "409": {
+            "description": "Business conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/inventory/{sku}": {
+      "get": {
+        "summary": "Inspect inventory",
+        "description": "Requires service authorization. Internal routes use the owning service port rather than gateway.",
+        "responses": {
+          "200": {
+            "description": "Current state or operation result"
+          },
+          "401": {
+            "description": "Invalid or absent JWT"
+          },
+          "403": {
+            "description": "Ownership or scope rejected"
+          },
+          "409": {
+            "description": "Business conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "sku",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/inventory/reservations/try": {
+      "post": {
+        "summary": "Try inventory",
+        "description": "Requires service authorization. Internal routes use the owning service port rather than gateway.",
+        "responses": {
+          "200": {
+            "description": "Current state or operation result"
+          },
+          "401": {
+            "description": "Invalid or absent JWT"
+          },
+          "403": {
+            "description": "Ownership or scope rejected"
+          },
+          "409": {
+            "description": "Business conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/inventory/reservations/{id}/confirm": {
+      "post": {
+        "summary": "Confirm inventory",
+        "description": "Requires service authorization. Internal routes use the owning service port rather than gateway.",
+        "responses": {
+          "200": {
+            "description": "Current state or operation result"
+          },
+          "401": {
+            "description": "Invalid or absent JWT"
+          },
+          "403": {
+            "description": "Ownership or scope rejected"
+          },
+          "409": {
+            "description": "Business conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/inventory/reservations/{id}/cancel": {
+      "post": {
+        "summary": "Cancel inventory",
+        "description": "Requires service authorization. Internal routes use the owning service port rather than gateway.",
+        "responses": {
+          "200": {
+            "description": "Current state or operation result"
+          },
+          "401": {
+            "description": "Invalid or absent JWT"
+          },
+          "403": {
+            "description": "Ownership or scope rejected"
+          },
+          "409": {
+            "description": "Business conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/payments/authorize": {
+      "post": {
+        "summary": "Authorize simulator intent",
+        "description": "Requires service authorization. Internal routes use the owning service port rather than gateway.",
+        "responses": {
+          "202": {
+            "description": "Operation durably queued; poll by operation ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentOperation"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Operation identity/payload conflict"
+          },
+          "403": {
+            "description": "Requires oms.service"
+          }
+        },
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PaymentAuthorization"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/payments/{id}/capture": {
+      "post": {
+        "summary": "Capture intent",
+        "description": "Requires service authorization. Internal routes use the owning service port rather than gateway.",
+        "responses": {
+          "202": {
+            "description": "Operation durably queued; poll by operation ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentOperation"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Operation identity/payload conflict"
+          },
+          "403": {
+            "description": "Requires oms.service"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/payments/{id}/void": {
+      "post": {
+        "summary": "Void intent",
+        "description": "Requires service authorization. Internal routes use the owning service port rather than gateway.",
+        "responses": {
+          "202": {
+            "description": "Operation durably queued; poll by operation ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentOperation"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Operation identity/payload conflict"
+          },
+          "403": {
+            "description": "Requires oms.service"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/payments/{id}/refunds": {
+      "post": {
+        "summary": "Refund eligible capture",
+        "description": "Requires service authorization. Internal routes use the owning service port rather than gateway.",
+        "responses": {
+          "202": {
+            "description": "Operation durably queued; poll by operation ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentOperation"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Operation identity/payload conflict"
+          },
+          "403": {
+            "description": "Requires oms.service"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/payments/{id}": {
+      "get": {
+        "summary": "Inspect intent",
+        "description": "Requires service authorization. Internal routes use the owning service port rather than gateway.",
+        "responses": {
+          "200": {
+            "description": "Current state or operation result"
+          },
+          "401": {
+            "description": "Invalid or absent JWT"
+          },
+          "403": {
+            "description": "Ownership or scope rejected"
+          },
+          "409": {
+            "description": "Business conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/sagas/{id}": {
+      "get": {
+        "summary": "Inspect Saga",
+        "description": "Requires admin authorization. Internal routes use the owning service port rather than gateway.",
+        "responses": {
+          "200": {
+            "description": "Current state or operation result"
+          },
+          "401": {
+            "description": "Invalid or absent JWT"
+          },
+          "403": {
+            "description": "Ownership or scope rejected"
+          },
+          "409": {
+            "description": "Business conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/sagas/{id}/steps": {
+      "get": {
+        "summary": "Inspect step history",
+        "description": "Requires admin authorization. Internal routes use the owning service port rather than gateway.",
+        "responses": {
+          "200": {
+            "description": "Current state or operation result"
+          },
+          "401": {
+            "description": "Invalid or absent JWT"
+          },
+          "403": {
+            "description": "Ownership or scope rejected"
+          },
+          "409": {
+            "description": "Business conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/sagas/{id}/retry": {
+      "post": {
+        "summary": "Retry same operation after inspection",
+        "description": "Requires admin authorization. Internal routes use the owning service port rather than gateway.",
+        "responses": {
+          "200": {
+            "description": "Current state or operation result"
+          },
+          "401": {
+            "description": "Invalid or absent JWT"
+          },
+          "403": {
+            "description": "Ownership or scope rejected"
+          },
+          "409": {
+            "description": "Business conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/sagas/{id}/compensate": {
+      "post": {
+        "summary": "Request safe compensation",
+        "description": "Requires admin authorization. Internal routes use the owning service port rather than gateway.",
+        "responses": {
+          "200": {
+            "description": "Current state or operation result"
+          },
+          "401": {
+            "description": "Invalid or absent JWT"
+          },
+          "403": {
+            "description": "Ownership or scope rejected"
+          },
+          "409": {
+            "description": "Business conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/query/orders/{id}": {
+      "get": {
+        "summary": "Read projected order",
+        "description": "Requires customer authorization. Internal routes use the owning service port rather than gateway.",
+        "responses": {
+          "200": {
+            "description": "Current state or operation result"
+          },
+          "401": {
+            "description": "Invalid or absent JWT"
+          },
+          "403": {
+            "description": "Ownership or scope rejected"
+          },
+          "409": {
+            "description": "Business conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/query/customers/me/orders": {
+      "get": {
+        "summary": "List projections",
+        "description": "Requires customer authorization. Internal routes use the owning service port rather than gateway.",
+        "responses": {
+          "200": {
+            "description": "Current state or operation result"
+          },
+          "401": {
+            "description": "Invalid or absent JWT"
+          },
+          "403": {
+            "description": "Ownership or scope rejected"
+          },
+          "409": {
+            "description": "Business conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "parameters": []
+      }
+    },
+    "/api/v1/query/orders/{id}/timeline": {
+      "get": {
+        "summary": "Read owned timeline",
+        "description": "Requires customer authorization. Internal routes use the owning service port rather than gateway.",
+        "responses": {
+          "200": {
+            "description": "Current state or operation result"
+          },
+          "401": {
+            "description": "Invalid or absent JWT"
+          },
+          "403": {
+            "description": "Ownership or scope rejected"
+          },
+          "409": {
+            "description": "Business conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/payments/operations/{id}": {
+      "get": {
+        "summary": "Inspect own provider operation; requires oms.service",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation state"
+          },
+          "403": {
+            "description": "Insufficient scope"
+          },
+          "409": {
+            "description": "Operation not in manual review"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/payments/{id}/operations": {
+      "get": {
+        "summary": "Inspect payment operations; requires oms.admin",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation state"
+          },
+          "403": {
+            "description": "Insufficient scope"
+          },
+          "409": {
+            "description": "Operation not in manual review"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/payments/operations/{id}/retry": {
+      "post": {
+        "summary": "Resume lookup of the same operation identity from manual review; requires oms.admin",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation state"
+          },
+          "403": {
+            "description": "Insufficient scope"
+          },
+          "409": {
+            "description": "Operation not in manual review"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/legacy-payments": {
+      "get": {
+        "description": "Requires oms.admin. Only the original local simulator may be imported; no financial calls are replayed.",
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Audited local migration result"
+          },
+          "403": {
+            "description": "Admin scope required"
+          },
+          "404": {
+            "description": "Resource unavailable"
+          },
+          "409": {
+            "description": "Conflicting identity, invalid evidence or native provider history"
+          }
+        },
+        "summary": "List up to 100 quarantined or migrating local payment balances"
+      }
+    },
+    "/api/v1/admin/legacy-payments/{id}/prepare": {
+      "post": {
+        "description": "Requires oms.admin. Only the original local simulator may be imported; no financial calls are replayed.",
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Audited local migration result"
+          },
+          "403": {
+            "description": "Admin scope required"
+          },
+          "404": {
+            "description": "Resource unavailable"
+          },
+          "409": {
+            "description": "Conflicting identity, invalid evidence or native provider history"
+          }
+        },
+        "summary": "Freeze and prepare an audited opening balance",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "source"
+                ],
+                "properties": {
+                  "source": {
+                    "type": "string",
+                    "enum": [
+                      "oms-local-simulator-v1"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/legacy-payments/migrations/{id}": {
+      "get": {
+        "description": "Requires oms.admin. Only the original local simulator may be imported; no financial calls are replayed.",
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Audited local migration result"
+          },
+          "403": {
+            "description": "Admin scope required"
+          },
+          "404": {
+            "description": "Resource unavailable"
+          },
+          "409": {
+            "description": "Conflicting identity, invalid evidence or native provider history"
+          }
+        },
+        "summary": "Inspect migration identity, digest and recovery status",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/legacy-payments/migrations/{id}/retry": {
+      "post": {
+        "description": "Requires oms.admin. Only the original local simulator may be imported; no financial calls are replayed.",
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Audited local migration result"
+          },
+          "403": {
+            "description": "Admin scope required"
+          },
+          "404": {
+            "description": "Resource unavailable"
+          },
+          "409": {
+            "description": "Conflicting identity, invalid evidence or native provider history"
+          }
+        },
+        "summary": "Retry manual review with the same frozen manifest",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "Problem": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer"
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      },
+      "Checkout": {
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 50,
+            "items": {
+              "type": "object",
+              "required": [
+                "sku",
+                "quantity"
+              ],
+              "properties": {
+                "sku": {
+                  "type": "string"
+                },
+                "quantity": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 1000
+                }
+              }
+            }
+          }
+        }
+      },
+      "PaymentOperation": {
+        "type": "object",
+        "required": [
+          "operationId",
+          "status"
+        ],
+        "properties": {
+          "operationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "SUBMITTING",
+              "UNKNOWN",
+              "SUCCEEDED",
+              "REJECTED",
+              "MANUAL_REVIEW"
+            ]
+          }
+        }
+      },
+      "PaymentAuthorization": {
+        "type": "object",
+        "required": [
+          "orderId",
+          "customerId",
+          "amount",
+          "currency"
+        ],
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "customerId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "amount": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1
+          },
+          "currency": {
+            "type": "string",
+            "pattern": "^[A-Z]{3}$"
+          }
+        }
+      }
+    }
+  }
+}

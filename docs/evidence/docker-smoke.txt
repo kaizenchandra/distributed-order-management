@@ -1,0 +1,4 @@
+PASS authenticated checkout, authoritative pricing, idempotency, ownership, projection, capture
+PASS cancellation, refund, allocation release, fulfillment cancellation
+PASS payment decline compensation
+PASS projection rebuild

@@ -1,0 +1,32 @@
+---
+services:
+  order-service:
+    build:
+      dockerfile: docker/Dockerfile.local
+  inventory-service:
+    build:
+      dockerfile: docker/Dockerfile.local
+  payment-service:
+    build:
+      dockerfile: docker/Dockerfile.local
+  fulfillment-service:
+    build:
+      dockerfile: docker/Dockerfile.local
+  saga-orchestrator:
+    build:
+      dockerfile: docker/Dockerfile.local
+  order-query-service:
+    build:
+      dockerfile: docker/Dockerfile.local
+  catalog-service:
+    build:
+      dockerfile: docker/Dockerfile.local
+  notification-service:
+    build:
+      dockerfile: docker/Dockerfile.local
+  api-gateway:
+    build:
+      dockerfile: docker/Dockerfile.local
+  payment-provider:
+    build:
+      dockerfile: docker/Dockerfile.local

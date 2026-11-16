@@ -1,0 +1,7 @@
+{
+  "run": "final-ready-checkout",
+  "orders": 200,
+  "completed": 200,
+  "compensated": 0,
+  "ledger_inventory_order_checks": "PASS"
+}

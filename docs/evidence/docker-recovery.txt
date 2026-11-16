@@ -1,0 +1,9 @@
+ Container oms-payment-service-1 Stopping 
+ Container oms-payment-service-1 Stopped 
+ Container oms-saga-orchestrator-1 Restarting 
+ Container oms-saga-orchestrator-1 Started 
+ Container oms-payment-service-1 Starting 
+ Container oms-payment-service-1 Started 
+PASS durable in-flight Saga restart and participant outage; captured 7500 once
+ Container oms-saga-orchestrator-1 Running 
+ Container oms-payment-service-1 Running 

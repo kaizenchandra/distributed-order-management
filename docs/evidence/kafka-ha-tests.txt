@@ -1,0 +1,4 @@
+PASS partition leader loss: five accepted orders completed with ISR=2
+PASS active controller loss: quorum re-elected and checkout continued
+PASS quorum/ISR loss: local order accepted, broker publication failed closed
+PASS restored quorum/ISR drained outbox and completed the pending order

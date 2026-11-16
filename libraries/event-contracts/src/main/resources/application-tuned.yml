@@ -1,0 +1,14 @@
+# Experimental local profile; throughput must be measured on the target deployment.
+spring:
+  task:
+    scheduling:
+      pool:
+        size: 2
+  kafka:
+    producer:
+      properties:
+        linger.ms: 5
+oms:
+  relay-delay: 100
+  provider:
+    poll-ms: 25

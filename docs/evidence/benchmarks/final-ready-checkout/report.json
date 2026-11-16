@@ -1,0 +1,29 @@
+{
+  "label": "final-ready-checkout",
+  "offered_rate": 10,
+  "submission_duration": "20s",
+  "wall_seconds": 131.074,
+  "offered": 201,
+  "accepted": 200,
+  "completed": 0,
+  "failed": 1,
+  "timeouts": 200,
+  "dropped_iterations": 0,
+  "poll_errors": 0,
+  "terminal_tps_including_drain": 0.0,
+  "command_ms": {
+    "max": 3186.552,
+    "avg": 1631.3937611940298,
+    "min": 60.869,
+    "med": 1681.76,
+    "p(90)": 2418.965,
+    "p(95)": 2505.074,
+    "p(99)": 2641.76
+  },
+  "saga_ms": null,
+  "k6_exit": 99,
+  "entrypoint": "http://localhost:8091",
+  "timestamp": "2026-11-15T14:51:24.307580+00:00",
+  "deployment": "host",
+  "accounting_gap": 0
+}

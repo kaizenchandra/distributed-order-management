@@ -1,0 +1,18 @@
+Current per-suite reports across the real-PostgreSQL run, projection timestamp correction rerun, and final 13-test Payment guard rerun.
+dev.oms.infra.EnvelopeTest: tests=1, failures=0, errors=0, skipped=0
+dev.oms.infra.MessagingTest: tests=2, failures=0, errors=0, skipped=0
+dev.oms.infra.SecurityTest: tests=5, failures=0, errors=0, skipped=0
+dev.oms.inventoryservice.InventoryTest: tests=4, failures=0, errors=0, skipped=0
+dev.oms.orderqueryservice.ProjectionTest: tests=2, failures=0, errors=0, skipped=0
+dev.oms.orderservice.EventStoreTest: tests=1, failures=0, errors=0, skipped=0
+dev.oms.orderservice.OrderTest: tests=1, failures=0, errors=0, skipped=0
+dev.oms.paymentprovider.LegacyBalancesTest: tests=3, failures=0, errors=0, skipped=0
+dev.oms.paymentprovider.ProviderHttpTest: tests=3, failures=0, errors=0, skipped=0
+dev.oms.paymentprovider.ProviderLedgerTest: tests=1, failures=0, errors=0, skipped=0
+dev.oms.paymentservice.LegacyMigrationTest: tests=4, failures=0, errors=0, skipped=0
+dev.oms.paymentservice.PaymentReconciliationTest: tests=7, failures=0, errors=0, skipped=0
+dev.oms.paymentservice.PaymentsTest: tests=2, failures=0, errors=0, skipped=0
+dev.oms.sagaorchestrator.ChoreographyDemoTest: tests=1, failures=0, errors=0, skipped=0
+dev.oms.sagaorchestrator.SagaRecoveryTest: tests=1, failures=0, errors=0, skipped=0
+dev.oms.sagaorchestrator.SagaReplyTest: tests=1, failures=0, errors=0, skipped=0
+TOTAL tests=39 failures=0 errors=0

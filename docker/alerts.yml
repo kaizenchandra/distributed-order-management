@@ -1,0 +1,18 @@
+groups:
+  - name: oms
+    rules:
+      - alert: OutboxPublicationDelayed
+        expr: oms_outbox_oldest_seconds > 60
+        for: 2m
+        labels: { severity: warning }
+        annotations: { summary: 'Committed OMS messages await publication' }
+      - alert: SagaRequiresReview
+        expr: oms_saga_manual_review > 0
+        for: 1m
+        labels: { severity: critical }
+        annotations: { summary: 'Inspect participant outcome before retry or compensation' }
+      - alert: ProjectionVersionGap
+        expr: oms_projection_gaps > 0
+        for: 2m
+        labels: { severity: warning }
+        annotations: { summary: 'Order projection has buffered noncontiguous versions' }

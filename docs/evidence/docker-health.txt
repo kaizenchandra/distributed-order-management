@@ -1,0 +1,13 @@
+api-gateway running healthy
+catalog-service running healthy
+fulfillment-service running healthy
+inventory-service running healthy
+kafka running 
+keycloak running 
+notification-service running healthy
+order-query-service running healthy
+order-service running healthy
+payment-provider running healthy
+payment-service running healthy
+postgres running healthy
+saga-orchestrator running healthy
